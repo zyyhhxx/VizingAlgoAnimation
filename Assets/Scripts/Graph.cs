@@ -47,6 +47,11 @@ public class Graph : MonoBehaviour
         
     }
 
+    public bool CanEditGraph()
+    {
+        return !BackToDrawingButton.IsInteractable();
+    }
+
     public void AddVertex()
     {
         Vector3 newPos = new Vector3(transform.position.x, transform.position.y, -2);

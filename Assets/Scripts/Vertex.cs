@@ -20,33 +20,41 @@ public class Vertex : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (!buildingEdge)
+        screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+        if (graph.CanEditGraph())
         {
-            screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
-
-            //When double click, select the vertex
-            if (clickTime < clickGap)
+            if (!buildingEdge)
             {
-                Select();
+                //When double click, select the vertex
+                if (clickTime < clickGap)
+                {
+                    Select();
+                }
+                clickTime = 0;
             }
-            clickTime = 0;
-        }
-        else
-        {
-            if(selected != this)
+            else
             {
-                graph.AddEdge(selected, this);
-                selected.UnSelect();
+                if (selected != this)
+                {
+                    graph.AddEdge(selected, this);
+                    selected.UnSelect();
+                }
             }
         }
     }
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (graph.CanEditGraph())
         {
-            graph.ClearEdges(this);
-            graph.RemoveVertex(id);
+            if (!buildingEdge)
+            {
+                if (Input.GetMouseButtonDown(1))
+                {
+                    graph.ClearEdges(this);
+                    graph.RemoveVertex(id);
+                }
+            }
         }
     }
 
@@ -57,14 +65,12 @@ public class Vertex : MonoBehaviour
 
     private void OnMouseDrag()
     {
-        //Debug.Log(transform.position);
         if (!buildingEdge)
         {
             Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 
             Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint);
             curPosition.z = -2;
-            //Debug.Log(curPosition);
             transform.position = curPosition;
         }
     }
@@ -80,12 +86,15 @@ public class Vertex : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        clickTime += Time.deltaTime;
-        if(selected == this)
+        if (graph.CanEditGraph())
         {
-            if (Input.GetMouseButton(1))
+            clickTime += Time.deltaTime;
+            if (selected == this)
             {
-                UnSelect();
+                if (Input.GetMouseButton(1))
+                {
+                    UnSelect();
+                }
             }
         }
     }
