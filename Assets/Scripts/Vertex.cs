@@ -120,7 +120,7 @@ public class Vertex : MonoBehaviour
                 }
             }
         }
-        tm.text = id.ToString();
+        tm.text = (id + 1).ToString();
     }
 
     private void Select()
