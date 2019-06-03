@@ -15,6 +15,8 @@ public class Graph : MonoBehaviour
 
     public GameObject vertexPrefab;
     public GameObject edgePrefab;
+
+    public int degree;
     private List<Step> steps;
     private int stepNum;
     private Colors colors;
@@ -114,6 +116,7 @@ public class Graph : MonoBehaviour
             }
         }
 
+        degree = maxDegree;
         DeltaText.text = "Delta: " + maxDegree.ToString() + "\nColors Used: " + maxColor.ToString();
     }
 
@@ -304,6 +307,210 @@ public class Graph : MonoBehaviour
             colors.Add(newColor);
             return newColor;
         }
+    }
+
+    public class VizingColoring
+    {
+        private int max;
+        private List<Step> steps;
+        private Graph graph;
+        private int[,] colorMatrix;
+        private Step currentStep;
+        private int count;
+
+        public VizingColoring(Graph g)
+        {
+            steps = new List<Step>();
+            max = g.degree;
+            graph = g;
+            count = 0;
+
+            //Color initialization
+            colorMatrix = new int[g.vertices.Count, g.vertices.Count];
+            for(int i = 0; i < g.vertices.Count; i++)
+            {
+                for (int j = 0; j < g.vertices.Count; j++)
+                {
+                    colorMatrix[i, j] = 0;
+                }
+            }
+
+            while(count < g.edges.Count)
+            {
+                var step = new Step(g.edges[count].v1.id, g.edges[count].v2.id);
+                currentStep = step;
+                steps.Add(step);
+                Debug.Log("Coloring: " + g.edges[count].ToString());
+                if (count < max)
+                {
+                    int start = g.edges[count].v1.id;
+                    int end = g.edges[count].v2.id;
+                    colorMatrix[start - 1, end - 1] = ++count;
+                    colorMatrix[end - 1, start - 1] = count;
+                    ReportChange(start, end, 0, count);
+                }
+                else
+                {
+                    //Recolor
+                    AddOneEdge(A, count++);
+                }
+            }
+        }
+
+        public void ReportChange(int v1, int v2, int oldColor, int newColor)
+        {
+            var change = new Change(v1, v2, oldColor, newColor);
+            currentStep.changes.Add(change);
+            Debug.Log(change);
+        }
+
+        public int MiissingColor(int vertex)
+        {
+            int tmp = 0;
+            for(int i = 1; i <= max; i++)
+            {
+                if(!IsColor(vertex, i))
+                {
+                    tmp = i;
+                    i = max + 1;
+                }
+            }
+            return tmp;
+        }
+
+        public bool IsColor(int vertex, int color)
+        {
+            for(int i = 0; i < graph.vertices.Count)
+            {
+                if (colorMatrix[vertex - 1, i] == color)
+                    return true;
+            }
+            return false;
+        }
+
+        public Tuple<int, int> LocateEdge(int vertex, int color)
+        {
+            int vertices = graph.vertices.Count;
+            for(int i = 0; i < vertices; i++)
+            {
+                if(colorMatrix[vertex - 1, i] == color)
+                {
+                    return new Tuple<int, int>(vertex, i + 1);
+                }
+            }
+            return new Tuple<int, int>(0, 0);
+        }
+
+        public bool IsIn(int edVertex, List<int> endVertices, int range, ref int position)
+        {
+            for(int i = 0; i < range; i++)
+            {
+                if(edVertex == endVertices[i])
+                {
+                    position = i;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void Recolor(int x, List<int> endVertices, List<int> missingCol, int start, int position)
+        {
+            int end;
+            int oldColor;
+            for (int i = start; i < position; i++)
+            {
+                end = endVertices[i];
+                oldColor = colorMatrix[x - 1,end - 1];
+                colorMatrix[x - 1, end - 1] = missingCol[end - 1];
+                colorMatrix[end - 1,x - 1] = missingCol[end - 1];
+                ReportChange(x, end, oldColor, missingCol[end - 1]);
+            }
+            end = endVertices[position];
+            oldColor = colorMatrix[x - 1, end - 1];
+            colorMatrix[x - 1, end - 1] = 0;
+            colorMatrix[end - 1, x - 1] = 0;
+            ReportChange(x, end, oldColor, 0);
+        }
+
+        public List<Edge> SearchEdges(List<Edge> A, int s, int t)
+        {
+            var first = new List<Edge>();
+            int tmp = 0;
+            for (int i = 0; i < count; i++)
+            {
+                int start = A[i].v1.id;
+                int end = A[i].v2.id;
+
+                if (colorMatrix[start - 1, end - 1] == s || colorMatrix[start - 1, end - 1] == t)
+                {
+                    var choose = SearchEdge(start - 1, end - 1);
+                    first.Insert(tmp++, choose);
+                }
+            }
+
+            var final = new List<Edge>();
+
+            for (int i = 0; i < tmp; i++)
+            {
+                final.Insert(i, first[i]);
+            }
+
+            return final;
+        }
+
+        public Edge SearchEdge(int v1, int v2)
+        {
+            for(int i = 0; i < graph.edges.Count; i++)
+            {
+                var edge = graph.edges[i];
+                if ((edge.v1.id == v1 && edge.v2.id == v2) || (edge.v1.id == v2 && edge.v2.id == v1))
+                {
+                    return edge;
+                }
+            }
+            return null;
+        }
+
+        public void SwitchColor(Graph subPtr, Color s, Color t, int vertex)
+        {
+            int v = subPtr.vertices.Count;
+
+            for (int i = 0; i < v; i++)
+            {
+                var L = *((subPtr->theAdj)->adj[i]);
+                ListIterator I;
+                if (subPtr->isConnected(i + 1, vertex))
+                {
+                    for (I.start(L); !I.done(); I++)
+                    {
+
+                        if ((i + 1) < I())
+                        {
+                            if (colorMatrix[i, I() - 1] == s)
+                            {
+                                colorMatrix[i, I() - 1] = t;
+                                colorMatrix[I() - 1, i] = t;
+                                ReportChange(i + 1, I(), s, t);
+                            }
+                            else
+                            {
+                                colorMatrix[i, I() - 1] = s;
+                                colorMatrix[I() - 1, i] = s;
+                                ReportChange(i + 1, I(), t, s);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public List<Step> VizingColor()
+        {
+
+        }
+
+
     }
 }
 

@@ -29,4 +29,9 @@ public class Edge : MonoBehaviour
         lr.endColor = newColor;
         colorId = id;
     }
+
+    public override string ToString()
+    {
+        return "Edge of " + v1.id.ToString() + "," + v2.id.ToString() + " with color " + id.ToString();
+    }
 }
