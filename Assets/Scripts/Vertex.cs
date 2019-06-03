@@ -12,6 +12,7 @@ public class Vertex : MonoBehaviour
     public int degree;
     public float clickGap = 0.3f;
     public int id;
+    public TextMesh tm;
 
     private Graph graph;
     private Vector3 screenPoint;
@@ -97,6 +98,7 @@ public class Vertex : MonoBehaviour
                 }
             }
         }
+        tm.text = id.ToString();
     }
 
     private void Select()
