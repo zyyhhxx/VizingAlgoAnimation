@@ -96,8 +96,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   degree: 0
   clickGap: 0.3
+  dragGap: 0.1
   id: 0
   tm: {fileID: 4661223253408839112}
+  dragTime: 0.2
 --- !u!58 &826937973517713285
 CircleCollider2D:
   m_ObjectHideFlags: 0

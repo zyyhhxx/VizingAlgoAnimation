@@ -11,6 +11,7 @@ public class Vertex : MonoBehaviour
 
     public int degree;
     public float clickGap = 0.3f;
+    public float dragGap = 0.1f;
     public int id;
     public TextMesh tm;
 
@@ -18,6 +19,7 @@ public class Vertex : MonoBehaviour
     private Vector3 screenPoint;
     private SpriteRenderer sr;
     private float clickTime;
+    public float dragTime;
 
     private void OnMouseDown()
     {
@@ -37,7 +39,10 @@ public class Vertex : MonoBehaviour
             {
                 if (selected != this)
                 {
-                    graph.AddEdge(selected, this);
+                    if (!CheckAdjacent(selected))
+                    {
+                        graph.AddEdge(selected, this);
+                    }
                     selected.UnSelect();
                 }
             }
@@ -59,27 +64,44 @@ public class Vertex : MonoBehaviour
         }
     }
 
-    private void OnMouseExit()
+    private void OnMouseUp()
     {
-        
+        dragTime = 0;
     }
 
     private void OnMouseDrag()
     {
         if (!buildingEdge)
         {
-            Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
-
-            Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint);
-            curPosition.z = -2;
-            transform.position = curPosition;
+            if (dragTime > dragGap)
+            {
+                Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+                Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint);
+                curPosition.z = -2;
+                transform.position = curPosition;
+            }
+            dragTime += Time.deltaTime;
         }
+    }
+
+    public bool CheckAdjacent(Vertex other)
+    {
+        foreach (var edge in graph.edges)
+        {
+            if ((edge.v1 == this && edge.v2 == other) ||
+                (edge.v1 == other && edge.v2 == this))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Start is called before the first frame update
     void Start()
     {
         clickTime = 0;
+        dragTime = 0;
         sr = gameObject.GetComponent<SpriteRenderer>();
         graph = GameObject.FindWithTag("graph").GetComponent<Graph>();
     }
