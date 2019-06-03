@@ -25,6 +25,7 @@ public class Graph : MonoBehaviour
     public Button PreviousButton;
     public Button NextButton;
 
+    public Text infoText;
     public Text DeltaText;
 
     // Start is called before the first frame update
@@ -37,6 +38,7 @@ public class Graph : MonoBehaviour
         BackToDrawingButton.interactable = false;
         PreviousButton.interactable = false;
         NextButton.interactable = false;
+        infoText.text = "";
 
         ReCalculateDelta();
     }
@@ -192,7 +194,8 @@ public class Graph : MonoBehaviour
     {
         stepNum++;
         var step = steps[stepNum - 1];
-        foreach(var change in step.changes)
+        UpdateInfo(step);
+        foreach (var change in step.changes)
         {
             Edge e = null;
             for(int i = 0; i < edges.Count; i++)
@@ -219,6 +222,12 @@ public class Graph : MonoBehaviour
     {
         var step = steps[stepNum - 1];
         stepNum--;
+
+        if (stepNum <= 0)
+            infoText.text = "";
+        else
+            UpdateInfo(steps[stepNum - 1]);
+
         foreach (var change in step.changes)
         {
             Edge e = null;
@@ -240,6 +249,18 @@ public class Graph : MonoBehaviour
             PreviousButton.interactable = false;
         }
         ReCalculateDelta();
+    }
+
+    public void UpdateInfo(Step step)
+    {
+        var result = "";
+        result += "Coloring edge " + step.coloredV1.ToString() + "," + step.coloredV2.ToString() + "\n";
+        foreach(var change in step.changes)
+        {
+            result += "Edge " + change.changedV1.ToString() + "," + change.changedV2.ToString() +
+                " is recolored from " + change.changedOldColor.ToString() + " to " + change.changedNewColor.ToString() + "\n";
+        }
+        infoText.text = result;
     }
 
     [DllImport("Vizing's Algorithm.dll", CallingConvention = CallingConvention.Cdecl)]
