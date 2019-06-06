@@ -228,8 +228,9 @@ public class Graph : MonoBehaviour
         else
             UpdateInfo(steps[stepNum - 1]);
 
-        foreach (var change in step.changes)
+        for (int j = step.changes.Count - 1; j >= 0; j--)
         {
+            var change = step.changes[j];
             Edge e = null;
             for (int i = 0; i < edges.Count; i++)
             {
