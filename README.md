@@ -8,6 +8,8 @@ You can watch a video illustration [here](https://drive.google.com/file/d/1TN8u8
 ## Installation
 Build the project in Unity2019.1.3f1, with target Windows. 
 
+Alternatively, download complete builds from [here](https://github.com/zyyhhxx/VizingAlgoAnimation/tree/C%2B%2BBackend/Builds)
+
 ## Usage
 Run the built project executable. 
 
